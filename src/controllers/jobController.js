@@ -63,12 +63,6 @@ class JobController {
             if (!jobData.customer) {
                 return res.status(400).json({ error: 'Customer name is required' });
             }
-            if (!jobData.customer_phone) {
-                return res.status(400).json({ error: 'Customer phone is required' });
-            }
-            if (!jobData.appointment_date) {
-                return res.status(400).json({ error: 'Appointment date is required' });
-            }
 
             const result = await jobService.createJob(jobData);
             res.status(201).json(result);

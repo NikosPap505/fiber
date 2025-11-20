@@ -31,4 +31,11 @@ router.post('/jobs', requireAdmin, jobController.createJob);
 router.put('/jobs/:sr_id', requireAdmin, jobController.updateJob);
 router.delete('/jobs/:sr_id', requireAdmin, jobController.deleteJob);
 
+// Team management routes (admin only)
+const teamController = require('../controllers/teamController');
+router.get('/teams/:job_sr_id', requireAdmin, teamController.getTeams);
+router.get('/teams/available/:team_type', requireAdmin, teamController.getAvailableUsers);
+router.post('/teams', requireAdmin, teamController.addMember);
+router.delete('/teams/:team_id', requireAdmin, teamController.removeMember);
+
 module.exports = router;

@@ -13,6 +13,7 @@ class JobService {
                 assignment_date: row.get('ΗΜΕΡΟΜΗΝΙΑ\nΑΝΑΘΕΣΗΣ'),
                 address: row.get('ΔΙΕΥΘΥΝΣΗ'),
                 area: row.get('ΠΕΡΙΟΧΗ'),
+                postal_code: row.get('ΤΚ'),
                 customer: row.get('ΠΕΛΑΤΗΣ'),
                 customer_phone: row.get('ΤΗΛ. ΕΠΙΚΟΙΝΩΝΙΑΣ ΠΕΛΑΤΗ'),
                 appointment_date: row.get('ΗΜΕΡΟΜΗΝΙΑ ΡΑΝΤΕΒΟΥ'),
@@ -20,7 +21,11 @@ class JobService {
                 status: row.get('STATUS\nΕΡΓΑΣΙΩΝ'),
                 cab: row.get('CAB'),
                 waiting: row.get('ΑΝΑΜΟΝΗ'),
+                ττλπ: row.get('ΤΤΛΠ ΑΝΑΘΕΣΗΣ'),
+                phase: row.get('ΠΕΡΙΓΡΑΦΗ ΕΡΓΑΣΙΩΝ - ΦΑΣΗ'),
+                smart: row.get('SMART READINESS'),
                 line_recording: row.get('ΓΡΑΜΜΟΓΡΑΦΗΣΗ'),
+                observations: row.get('ΠΑΡΑΤΗΡΗΣΕΙΣ'),
                 autopsy_date: row.get('Ημερομηνία ολοκλήρωσης αυτοψίας'),
                 digging_date: row.get('Ημερομηνία\nΧωματουργικών'),
                 construction_date: row.get('Ημερομηνία\nΚάθετου'),
@@ -60,13 +65,23 @@ class JobService {
                 assignment_date: row.get('ΗΜΕΡΟΜΗΝΙΑ\nΑΝΑΘΕΣΗΣ'),
                 address: row.get('ΔΙΕΥΘΥΝΣΗ'),
                 area: row.get('ΠΕΡΙΟΧΗ'),
+                postal_code: row.get('ΤΚ'),
                 customer: row.get('ΠΕΛΑΤΗΣ'),
                 customer_phone: row.get('ΤΗΛ. ΕΠΙΚΟΙΝΩΝΙΑΣ ΠΕΛΑΤΗ'),
                 appointment_date: row.get('ΗΜΕΡΟΜΗΝΙΑ ΡΑΝΤΕΒΟΥ'),
                 appointment_time: row.get('Ώρα ραντεβού'),
                 status: row.get('STATUS\nΕΡΓΑΣΙΩΝ'),
                 cab: row.get('CAB'),
-                waiting: row.get('ΑΝΑΜΟΝΗ')
+                waiting: row.get('ΑΝΑΜΟΝΗ'),
+                ττλπ: row.get('ΤΤΛΠ ΑΝΑΘΕΣΗΣ'),
+                phase: row.get('ΠΕΡΙΓΡΑΦΗ ΕΡΓΑΣΙΩΝ - ΦΑΣΗ'),
+                smart: row.get('SMART READINESS'),
+                line_recording: row.get('ΓΡΑΜΜΟΓΡΑΦΗΣΗ'),
+                observations: row.get('ΠΑΡΑΤΗΡΗΣΕΙΣ'),
+                autopsy_date: row.get('Ημερομηνία ολοκλήρωσης αυτοψίας'),
+                digging_date: row.get('Ημερομηνία\nΧωματουργικών'),
+                construction_date: row.get('Ημερομηνία\nΚάθετου'),
+                optical_date: row.get('Ημερομηνία Οπτικού')
             };
         } catch (error) {
             console.error('Error getting job:', error);
@@ -99,19 +114,20 @@ class JobService {
                 'Υπογραφή': '',
                 'Ημερομηνία ολοκλήρωσης αυτοψίας': '',
                 'Συστημικό ανέβασμα αυτοψίας': '',
-                'STATUS\nΕΡΓΑΣΙΩΝ': 'ΕΚΚΡΕΜΕΙ',
+                'STATUS\nΕΡΓΑΣΙΩΝ': jobData.status || 'ΕΚΚΡΕΜΕΙ',
                 'SMART READINESS': jobData.smart || 'ΜΕ SMART',
                 'CAB': jobData.cab || '',
                 'ΑΝΑΜΟΝΗ': jobData.waiting || '',
-                'Ημερομηνία\nΧωματουργικών': '',
+                'Ημερομηνία\nΧωματουργικών': jobData.digging_date || '',
                 'ΧΩΜΑΤΟΥΡΓΙΚΑ': '',
-                'Ημερομηνία\nΚάθετου': '',
+                'Ημερομηνία\nΚάθετου': jobData.construction_date || '',
                 'Κάθετο': '',
                 'Ημερομηνία\nΕμφύσησης': '',
                 'Εμφύσηση': '',
-                'Ημερομηνία Οπτικού': '',
+                'Ημερομηνία Οπτικού': jobData.optical_date || '',
                 'Οπτικό': '',
-                'ΓΡΑΜΜΟΓΡΑΦΗΣΗ': ''
+                'ΓΡΑΜΜΟΓΡΑΦΗΣΗ': jobData.line_recording || '',
+                'ΠΑΡΑΤΗΡΗΣΕΙΣ': jobData.observations || ''
             };
 
             await sheetService.addRow('Φύλλο1', newJob);

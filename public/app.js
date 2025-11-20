@@ -11,17 +11,22 @@ function switchTab(tab) {
     const reportsTab = document.getElementById('tab-reports');
     const usersTab = document.getElementById('tab-users');
     const jobsTab = document.getElementById('tab-jobs');
+    const teamsTab = document.getElementById('tab-teams');
+    const teamsView = document.getElementById('view-teams');
 
     // Hide all views
     sitesView.classList.add('hidden');
     reportsView.classList.add('hidden');
     usersView.classList.add('hidden');
     jobsView.classList.add('hidden');
+    if (teamsView) teamsView.classList.add('hidden');
 
     // Reset all tabs
-    [sitesTab, reportsTab, usersTab, jobsTab].forEach(t => {
-        t.classList.remove('border-indigo-500', 'text-indigo-600');
-        t.classList.add('border-transparent', 'text-gray-500');
+    [sitesTab, reportsTab, usersTab, jobsTab, teamsTab].forEach(t => {
+        if (t) {
+            t.classList.remove('border-indigo-500', 'text-indigo-600');
+            t.classList.add('border-transparent', 'text-gray-500');
+        }
     });
 
     // Show selected view and activate tab
@@ -45,6 +50,11 @@ function switchTab(tab) {
         jobsTab.classList.add('border-indigo-500', 'text-indigo-600');
         jobsTab.classList.remove('border-transparent', 'text-gray-500');
         loadJobs();
+    } else if (tab === 'teams') {
+        teamsView.classList.remove('hidden');
+        teamsTab.classList.add('border-indigo-500', 'text-indigo-600');
+        teamsTab.classList.remove('border-transparent', 'text-gray-500');
+        loadJobsForSelector();
     }
 }
 
@@ -90,10 +100,14 @@ async function loadSites() {
             tbody.appendChild(tr);
         });
 
-        // Update stats
-        document.getElementById('total-sites').textContent = sites.length;
-        document.getElementById('pending-sites').textContent = pending;
-        document.getElementById('completed-sites').textContent = completed;
+        // Update stats (if elements exist)
+        const totalSitesEl = document.getElementById('total-sites');
+        const pendingSitesEl = document.getElementById('pending-sites');
+        const completedSitesEl = document.getElementById('completed-sites');
+
+        if (totalSitesEl) totalSitesEl.textContent = sites.length;
+        if (pendingSitesEl) pendingSitesEl.textContent = pending;
+        if (completedSitesEl) completedSitesEl.textContent = completed;
 
     } catch (error) {
         console.error('Error loading sites:', error);
@@ -266,6 +280,7 @@ async function loadJobs() {
                     </span>
                 </td>
                 <td class="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-sm">
+                    <button onclick="editJob('${job.sr_id}')" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</button>
                     <button onclick="deleteJob('${job.sr_id}')" class="text-red-600 hover:text-red-900">Delete</button>
                 </td>
             `;
@@ -278,12 +293,32 @@ async function loadJobs() {
 }
 
 function showAddJobModal() {
-    document.getElementById('add-job-modal').classList.remove('hidden');
+    const modal = document.getElementById('add-job-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+    }
 }
 
 function closeAddJobModal() {
-    document.getElementById('add-job-modal').classList.add('hidden');
-    document.getElementById('add-job-form').reset();
+    const modal = document.getElementById('add-job-modal');
+    const form = document.getElementById('add-job-form');
+    const modalTitle = document.querySelector('#add-job-modal h3');
+
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+    if (form) {
+        form.reset();
+        // Re-enable SR ID field
+        const srIdField = form.querySelector('[name="sr_id"]');
+        if (srIdField) srIdField.disabled = false;
+    }
+    if (modalTitle) {
+        modalTitle.textContent = 'Προσθήκη Νέας Εργασίας';
+    }
+
+    // Reset editing mode
+    editingJobId = null;
 }
 
 async function submitJob(event) {
@@ -297,36 +332,145 @@ async function submitJob(event) {
     const date = new Date(dateInput);
     const formattedDate = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
 
+    const assignDateInput = formData.get('assignment_date');
+    const formattedAssignDate = assignDateInput ?
+        (() => { const d = new Date(assignDateInput); return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`; })() :
+        new Date().toLocaleDateString('en-US');
+
     const jobData = {
         sr_id: formData.get('sr_id'),
+        assignment_date: formattedAssignDate,
         address: formData.get('address'),
         area: formData.get('area'),
+        postal_code: formData.get('postal_code'),
         customer: formData.get('customer'),
         customer_phone: formData.get('customer_phone'),
         appointment_date: formattedDate,
         appointment_time: formData.get('appointment_time'),
         cab: formData.get('cab'),
-        waiting: formData.get('waiting')
+        waiting: formData.get('waiting'),
+        ττλπ: formData.get('ττλπ'),
+        phase: formData.get('phase'),
+        smart: formData.get('smart'),
+        status: formData.get('status'),
+        autopsy_date: formData.get('autopsy_date') ? (() => { const d = new Date(formData.get('autopsy_date')); return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`; })() : '',
+        digging_date: formData.get('digging_date') ? (() => { const d = new Date(formData.get('digging_date')); return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`; })() : '',
+        construction_date: formData.get('construction_date') ? (() => { const d = new Date(formData.get('construction_date')); return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`; })() : '',
+        optical_date: formData.get('optical_date') ? (() => { const d = new Date(formData.get('optical_date')); return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`; })() : '',
+        line_recording: formData.get('line_recording'),
+        observations: formData.get('observations')
     };
 
     try {
-        const response = await fetch('/api/jobs', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(jobData)
-        });
+        let response;
+        if (editingJobId) {
+            // Update existing job
+            response = await fetch(`/api/jobs/${editingJobId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(jobData)
+            });
+        } else {
+            // Create new job
+            response = await fetch('/api/jobs', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(jobData)
+            });
+        }
 
         if (response.ok) {
             closeAddJobModal();
             loadJobs();
-            alert('Job added successfully!');
+            alert(editingJobId ? 'Job updated successfully!' : 'Job added successfully!');
+            editingJobId = null; // Reset editing mode
         } else {
             const error = await response.json();
-            alert('Failed to add job: ' + error.error);
+            alert('Failed to save job: ' + error.error);
         }
     } catch (error) {
-        console.error('Error adding job:', error);
-        alert('Failed to add job');
+        console.error('Error saving job:', error);
+        alert('Failed to save job');
+    }
+}
+
+// Global variable to track if we're editing
+let editingJobId = null;
+
+async function editJob(srId) {
+    try {
+        // Fetch job data
+        const response = await fetch(`/api/jobs/${srId}`);
+        const job = await response.json();
+
+        if (!response.ok) {
+            alert('Failed to load job data');
+            return;
+        }
+
+        // Set editing mode
+        editingJobId = srId;
+
+        // Fill form with job data
+        const form = document.getElementById('add-job-form');
+        if (!form) return;
+
+        form.querySelector('[name="sr_id"]').value = job.sr_id || '';
+        form.querySelector('[name="sr_id"]').disabled = true; // Can't change SR ID
+        form.querySelector('[name="address"]').value = job.address || '';
+        form.querySelector('[name="area"]').value = job.area || '';
+        form.querySelector('[name="postal_code"]').value = job.postal_code || '';
+        form.querySelector('[name="customer"]').value = job.customer || '';
+        form.querySelector('[name="customer_phone"]').value = job.customer_phone || '';
+        form.querySelector('[name="cab"]').value = job.cab || '';
+        form.querySelector('[name="waiting"]').value = job.waiting || '';
+        form.querySelector('[name="ττλπ"]').value = job.ττλπ || '';
+        form.querySelector('[name="phase"]').value = job.phase || 'Α';
+        form.querySelector('[name="smart"]').value = job.smart || 'ΜΕ SMART';
+        form.querySelector('[name="status"]').value = job.status || 'ΕΚΚΡΕΜΕΙ';
+        form.querySelector('[name="line_recording"]').value = job.line_recording || '';
+        form.querySelector('[name="observations"]').value = job.observations || '';
+
+        // Convert dates from M/D/YYYY to YYYY-MM-DD for input[type="date"]
+        if (job.assignment_date) {
+            const assignDate = new Date(job.assignment_date);
+            form.querySelector('[name="assignment_date"]').value = assignDate.toISOString().split('T')[0];
+        }
+        if (job.appointment_date) {
+            const apptDate = new Date(job.appointment_date);
+            form.querySelector('[name="appointment_date"]').value = apptDate.toISOString().split('T')[0];
+        }
+        if (job.appointment_time) {
+            form.querySelector('[name="appointment_time"]').value = job.appointment_time;
+        }
+        if (job.autopsy_date) {
+            const autopsyDate = new Date(job.autopsy_date);
+            form.querySelector('[name="autopsy_date"]').value = autopsyDate.toISOString().split('T')[0];
+        }
+        if (job.digging_date) {
+            const diggingDate = new Date(job.digging_date);
+            form.querySelector('[name="digging_date"]').value = diggingDate.toISOString().split('T')[0];
+        }
+        if (job.construction_date) {
+            const constructionDate = new Date(job.construction_date);
+            form.querySelector('[name="construction_date"]').value = constructionDate.toISOString().split('T')[0];
+        }
+        if (job.optical_date) {
+            const opticalDate = new Date(job.optical_date);
+            form.querySelector('[name="optical_date"]').value = opticalDate.toISOString().split('T')[0];
+        }
+
+        // Update modal title
+        const modalTitle = document.querySelector('#add-job-modal h3');
+        if (modalTitle) {
+            modalTitle.textContent = 'Επεξεργασία Εργασίας';
+        }
+
+        // Show modal
+        showAddJobModal();
+    } catch (error) {
+        console.error('Error loading job for edit:', error);
+        alert('Failed to load job data');
     }
 }
 
@@ -359,3 +503,172 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load users in background for dropdown
     fetch('/api/users').then(r => r.json()).then(users => allUsers = users);
 });
+
+// Teams Management Functions
+
+async function loadJobsForSelector() {
+    try {
+        const response = await fetch('/api/jobs');
+        const jobs = await response.json();
+
+        const selector = document.getElementById('team-job-selector');
+        selector.innerHTML = '<option value="">-- Select a job --</option>';
+
+        jobs.forEach(job => {
+            const option = document.createElement('option');
+            option.value = job.sr_id;
+            option.textContent = `${job.sr_id} - ${job.address} (${job.customer})`;
+            selector.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error loading jobs for selector:', error);
+    }
+}
+
+// Global variable to track current teams state
+let currentJobTeams = {
+    AUTOPSY: [],
+    CONSTRUCTION: [],
+    DIGGING: [],
+    OPTICAL: []
+};
+
+async function loadTeamsForJob() {
+    const jobSrId = document.getElementById('team-job-selector').value;
+    if (!jobSrId) {
+        // Clear teams if no job selected
+        ['autopsy', 'construction', 'digging', 'optical'].forEach(type => {
+            document.getElementById(`team-${type}`).innerHTML = '<p class="text-sm text-gray-500">No members assigned</p>';
+        });
+        currentJobTeams = { AUTOPSY: [], CONSTRUCTION: [], DIGGING: [], OPTICAL: [] };
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/teams/${jobSrId}`);
+        const teams = await response.json();
+        currentJobTeams = teams; // Update global state
+
+        // Render each team
+        Object.keys(teams).forEach(type => {
+            const containerId = `team-${type.toLowerCase()}`;
+            const container = document.getElementById(containerId);
+            const members = teams[type];
+
+            if (members.length === 0) {
+                container.innerHTML = '<p class="text-sm text-gray-500">No members assigned</p>';
+            } else {
+                container.innerHTML = members.map(member => `
+                    <div class="flex justify-between items-center bg-white p-2 rounded border text-sm">
+                        <div>
+                            <span class="font-medium">${member.user_name}</span>
+                            <div class="text-xs text-gray-500">Assigned: ${member.assigned_date}</div>
+                        </div>
+                        <button onclick="removeMember('${member.team_id}')" class="text-red-500 hover:text-red-700">✕</button>
+                    </div>
+                `).join('');
+            }
+        });
+    } catch (error) {
+        console.error('Error loading teams:', error);
+        alert('Failed to load teams');
+    }
+}
+
+async function showAddMemberModal(teamType) {
+    const jobSrId = document.getElementById('team-job-selector').value;
+    if (!jobSrId) {
+        alert('Please select a job first');
+        return;
+    }
+
+    document.getElementById('member-team-type').value = teamType;
+    document.getElementById('add-member-modal').classList.remove('hidden');
+
+    // Load available users for this team type
+    const userSelect = document.getElementById('member-user-select');
+    userSelect.innerHTML = '<option value="">Loading...</option>';
+
+    try {
+        const response = await fetch(`/api/teams/available/${teamType}`);
+        const users = await response.json();
+
+        // Filter out users already in the team
+        const existingMemberIds = currentJobTeams[teamType] ? currentJobTeams[teamType].map(m => m.user_id) : [];
+        const availableUsers = users.filter(user => !existingMemberIds.includes(user.user_id));
+
+        if (availableUsers.length === 0) {
+            userSelect.innerHTML = '<option value="">No available users</option>';
+        } else {
+            userSelect.innerHTML = '<option value="">Select a user</option>';
+            availableUsers.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.user_id;
+                option.dataset.name = user.name;
+                option.textContent = user.name;
+                userSelect.appendChild(option);
+            });
+        }
+    } catch (error) {
+        console.error('Error loading users:', error);
+        userSelect.innerHTML = '<option value="">Error loading users</option>';
+    }
+}
+
+function closeAddMemberModal() {
+    document.getElementById('add-member-modal').classList.add('hidden');
+    document.getElementById('add-member-form').reset();
+}
+
+async function submitAddMember(event) {
+    event.preventDefault();
+
+    const jobSrId = document.getElementById('team-job-selector').value;
+    const teamType = document.getElementById('member-team-type').value;
+    const userSelect = document.getElementById('member-user-select');
+    const userId = userSelect.value;
+    const userName = userSelect.options[userSelect.selectedIndex].dataset.name;
+
+    try {
+        const response = await fetch('/api/teams', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                job_sr_id: jobSrId,
+                team_type: teamType,
+                user_id: userId,
+                user_name: userName
+            })
+        });
+
+        if (response.ok) {
+            closeAddMemberModal();
+            loadTeamsForJob(); // Refresh teams
+        } else {
+            const error = await response.json();
+            alert('Failed to add member: ' + error.error);
+        }
+    } catch (error) {
+        console.error('Error adding member:', error);
+        alert('Failed to add member');
+    }
+}
+
+async function removeMember(teamId) {
+    if (!confirm('Are you sure you want to remove this member?')) return;
+
+    try {
+        const response = await fetch(`/api/teams/${teamId}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            loadTeamsForJob(); // Refresh teams
+        } else {
+            alert('Failed to remove member');
+        }
+    } catch (error) {
+        console.error('Error removing member:', error);
+        alert('Failed to remove member');
+    }
+}

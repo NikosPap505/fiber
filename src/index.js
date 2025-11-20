@@ -15,14 +15,14 @@ app.use(cookieParser());
 
 // Session configuration
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'your-secret-key-change-in-production',
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-        secure: false, // Set to true if using HTTPS
-        httpOnly: true,
-        maxAge: 24 * 60 * 60 * 1000 // 24 hours
-    }
+  secret: process.env.SESSION_SECRET || 'your-secret-key-change-in-production',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: false, // Set to true if using HTTPS
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
 }));
 
 app.use(express.static('public'));
@@ -36,12 +36,7 @@ const apiRoutes = require('./routes/api');
 app.use('/api', apiRoutes);
 
 
-// Basic Route
-app.get('/', (req, res) => {
-  res.send('Fiber Construction Management System API is running');
-});
-
 // Start Server
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${ PORT } `);
+  console.log(`Server is running on port ${PORT}`);
 });

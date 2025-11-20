@@ -4,71 +4,480 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome - Fiber Management System</title>
+    <title>Dashboard - Fiber Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body class="bg-gradient-to-br from-indigo-500 to-purple-600">
-    <div class="min-h-screen flex items-center justify-center px-4">
-        <div class="max-w-4xl w-full text-center">
-            <!-- Logo/Title -->
-            <div class="mb-8">
-                <h1 class="text-5xl md:text-6xl font-bold text-white mb-4">
-                    Fiber Management System
-                </h1>
-                <p class="text-xl md:text-2xl text-indigo-100">
-                    Manage your fiber optic projects efficiently
-                </p>
-            </div>
-
-            <!-- Features -->
-            <div class="grid md:grid-cols-3 gap-6 mb-12">
-                <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-lg p-6 text-white">
-                    <div class="text-4xl mb-3">📋</div>
-                    <h3 class="text-lg font-semibold mb-2">Task Management</h3>
-                    <p class="text-indigo-100">Track and manage all your fiber installation tasks</p>
-                </div>
-                <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-lg p-6 text-white">
-                    <div class="text-4xl mb-3">👥</div>
-                    <h3 class="text-lg font-semibold mb-2">Team Collaboration</h3>
-                    <p class="text-indigo-100">Coordinate with optical, construction, and digging teams</p>
-                </div>
-                <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-lg p-6 text-white">
-                    <div class="text-4xl mb-3">📱</div>
-                    <h3 class="text-lg font-semibold mb-2">Telegram Integration</h3>
-                    <p class="text-indigo-100">Receive updates and submit reports via Telegram bot</p>
+<body class="bg-gray-50">
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-white shadow">
+            <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+                <h1 class="text-2xl font-bold text-gray-900">Fiber Management</h1>
+                <div class="flex items-center gap-4">
+                    <span id="user-info" class="text-sm text-gray-600"></span>
+                    <button onclick="logout()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+                        Logout
+                    </button>
                 </div>
             </div>
+        </header>
 
-            <!-- CTA Buttons -->
-            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <a href="/login.html"
-                    class="bg-white text-indigo-600 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-indigo-50 transition-colors shadow-lg w-full sm:w-auto">
-                    Sign In
-                </a>
-                <a href="/signup.html"
-                    class="bg-indigo-700 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-indigo-800 transition-colors shadow-lg w-full sm:w-auto">
-                    Create Account
-                </a>
+        <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <!-- Tabs -->
+            <div class="mb-6">
+                <div class="border-b border-gray-200">
+                    <nav class="-mb-px flex space-x-8">
+                        <button onclick="switchTab('sites')" id="tab-sites"
+                            class="tab-button border-indigo-500 text-indigo-600 py-4 px-1 border-b-2 font-medium text-sm">
+                            Sites
+                        </button>
+                        <button onclick="switchTab('reports')" id="tab-reports"
+                            class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 py-4 px-1 border-b-2 font-medium text-sm">
+                            Reports
+                        </button>
+                        <button onclick="switchTab('users')" id="tab-users" style="display:none"
+                            class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 py-4 px-1 border-b-2 font-medium text-sm">
+                            Users
+                        </button>
+                        <button onclick="switchTab('jobs')" id="tab-jobs" style="display:none"
+                            class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 py-4 px-1 border-b-2 font-medium text-sm">
+                            Jobs
+                        </button>
+                        <button onclick="switchTab('teams')" id="tab-teams" style="display:none"
+                            class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 py-4 px-1 border-b-2 font-medium text-sm">
+                            Teams
+                        </button>
+                    </nav>
+                </div>
             </div>
 
-            <!-- Footer -->
-            <div class="mt-12 text-indigo-100">
-                <p>&copy; 2025 Fiber Management System. All rights reserved.</p>
+            <!-- Sites View -->
+            <div id="view-sites">
+                <div class="bg-white shadow rounded-lg p-6">
+                    <h2 class="text-xl font-semibold mb-4">My Tasks</h2>
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Site ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Address</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sites-table-body" class="bg-white divide-y divide-gray-200">
+                            <!-- Populated by app.js -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
+
+            <!-- Reports View -->
+            <div id="view-reports" class="hidden">
+                <div class="bg-white shadow rounded-lg p-6">
+                    <h2 class="text-xl font-semibold mb-4">Reports</h2>
+                    <select id="report-type-filter" onchange="loadReports()" class="mb-4 px-3 py-2 border rounded">
+                        <option value="all">All Reports</option>
+                        <option value="autopsy">Autopsy</option>
+                        <option value="construction">Construction</option>
+                        <option value="digging">Digging</option>
+                        <option value="optical">Optical</option>
+                    </select>
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Site ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reports-table-body" class="bg-white divide-y divide-gray-200">
+                            <!-- Populated by app.js -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Users View -->
+            <div id="view-users" class="hidden">
+                <div class="bg-white shadow rounded-lg p-6">
+                    <h2 class="text-xl font-semibold mb-4">Users</h2>
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">User ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-table-body" class="bg-white divide-y divide-gray-200">
+                            <!-- Populated by app.js -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Jobs View -->
+            <div id="view-jobs" class="hidden">
+                <div class="bg-white shadow rounded-lg p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold">Jobs Management</h2>
+                        <button onclick="showAddJobModal()"
+                            class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                            + Add Job
+                        </button>
+                    </div>
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">SR ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Address</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="jobs-table-body" class="bg-white divide-y divide-gray-200">
+                            <!-- Populated by app.js -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Teams View -->
+            <div id="view-teams" class="hidden">
+                <div class="bg-white shadow rounded-lg p-6">
+                    <h2 class="text-xl font-semibold mb-4">Teams Management</h2>
+
+                    <!-- Job Selector -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Select Job:</label>
+                        <select id="team-job-selector" onchange="loadTeamsForJob()"
+                            class="w-full md:w-1/2 px-3 py-2 border rounded-md focus:border-indigo-500 focus:ring-indigo-500">
+                            <option value="">-- Select a job --</option>
+                        </select>
+                    </div>
+
+                    <!-- Team Cards Grid -->
+                    <div id="teams-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Autopsy Team -->
+                        <div class="border rounded-lg p-4 bg-blue-50">
+                            <h3 class="text-lg font-semibold mb-3 text-blue-800">Autopsy Team</h3>
+                            <div id="team-autopsy" class="space-y-2 mb-4 min-h-[100px]">
+                                <p class="text-sm text-gray-500">No members assigned</p>
+                            </div>
+                            <button onclick="showAddMemberModal('AUTOPSY')"
+                                class="w-full bg-blue-600 text-white px-3 py-2 rounded hover:bg-blue-700 text-sm">
+                                + Add Member
+                            </button>
+                        </div>
+
+                        <!-- Construction Team -->
+                        <div class="border rounded-lg p-4 bg-orange-50">
+                            <h3 class="text-lg font-semibold mb-3 text-orange-800">Construction Team</h3>
+                            <div id="team-construction" class="space-y-2 mb-4 min-h-[100px]">
+                                <p class="text-sm text-gray-500">No members assigned</p>
+                            </div>
+                            <button onclick="showAddMemberModal('CONSTRUCTION')"
+                                class="w-full bg-orange-600 text-white px-3 py-2 rounded hover:bg-orange-700 text-sm">
+                                + Add Member
+                            </button>
+                        </div>
+
+                        <!-- Digging Team -->
+                        <div class="border rounded-lg p-4 bg-yellow-50">
+                            <h3 class="text-lg font-semibold mb-3 text-yellow-800">Digging Team</h3>
+                            <div id="team-digging" class="space-y-2 mb-4 min-h-[100px]">
+                                <p class="text-sm text-gray-500">No members assigned</p>
+                            </div>
+                            <button onclick="showAddMemberModal('DIGGING')"
+                                class="w-full bg-yellow-600 text-white px-3 py-2 rounded hover:bg-yellow-700 text-sm">
+                                + Add Member
+                            </button>
+                        </div>
+
+                        <!-- Optical Team -->
+                        <div class="border rounded-lg p-4 bg-green-50">
+                            <h3 class="text-lg font-semibold mb-3 text-green-800">Optical Team</h3>
+                            <div id="team-optical" class="space-y-2 mb-4 min-h-[100px]">
+                                <p class="text-sm text-gray-500">No members assigned</p>
+                            </div>
+                            <button onclick="showAddMemberModal('OPTICAL')"
+                                class="w-full bg-green-600 text-white px-3 py-2 rounded hover:bg-green-700 text-sm">
+                                + Add Member
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add Job Modal -->
+    <div id="add-job-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div
+            class="relative top-10 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-2/3 shadow-lg rounded-md bg-white max-h-screen overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-medium">Προσθήκη Νέας Εργασίας</h3>
+                <button onclick="closeAddJobModal()" class="text-gray-400 hover:text-gray-600 text-2xl">✕</button>
+            </div>
+            <form id="add-job-form" onsubmit="submitJob(event)">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- SR ID -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">SR ID *</label>
+                        <input type="text" name="sr_id" required
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    </div>
+
+                    <!-- Ημερομηνία Ανάθεσης -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Ημερομηνία Ανάθεσης</label>
+                        <input type="date" name="assignment_date"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    </div>
+
+                    <!-- Διεύθυνση -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700">Διεύθυνση *</label>
+                        <input type="text" name="address" required
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    </div>
+
+                    <!-- Περιοχή -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Περιοχή</label>
+                        <input type="text" name="area"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    </div>
+
+                    <!-- ΤΚ -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">ΤΚ</label>
+                        <input type="text" name="postal_code"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    </div>
+
+                    <!-- Πελάτης -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Πελάτης *</label>
+                        <input type="text" name="customer" required
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    </div>
+
+                    <!-- Τηλ. Πελάτη -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Τηλ. Επικοινωνίας Πελάτη *</label>
+                        <input type="tel" name="customer_phone"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    </div>
+
+                    <!-- Ημερομηνία Ραντεβού -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Ημερομηνία Ραντεβού *</label>
+                        <input type="date" name="appointment_date"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    </div>
+
+                    <!-- Ώρα Ραντεβού -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Ώρα Ραντεβού</label>
+                        <input type="time" name="appointment_time"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    </div>
+
+                    <!-- CAB -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">CAB</label>
+                        <input type="text" name="cab"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    </div>
+
+                    <!-- Αναμονή -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Αναμονή</label>
+                        <input type="text" name="waiting"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    </div>
+
+                    <!-- ΤΤΛΠ Ανάθεσης -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">ΤΤΛΠ Ανάθεσης</label>
+                        <select name="ττλπ"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <option value="">Επιλέξτε...</option>
+                            <option value="Τ.Τ.Λ.Π. ΑΤΤΙΚΗΣ">Τ.Τ.Λ.Π. ΑΤΤΙΚΗΣ</option>
+                            <option value="Τ.Τ.Λ.Π. ΘΕΣΣΑΛΟΝΙΚΗΣ">Τ.Τ.Λ.Π. ΘΕΣΣΑΛΟΝΙΚΗΣ</option>
+                            <option value="Τ.Τ.Λ.Π. ΑΧΑΪΑΣ">Τ.Τ.Λ.Π. ΑΧΑΪΑΣ</option>
+                        </select>
+                    </div>
+
+                    <!-- Φάση -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Φάση</label>
+                        <select name="phase"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <option value="Α">Α</option>
+                            <option value="Β">Β</option>
+                            <option value="Γ">Γ</option>
+                        </select>
+                    </div>
+
+                    <!-- Smart Readiness -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Smart Readiness</label>
+                        <select name="smart"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <option value="ΜΕ SMART">ΜΕ SMART</option>
+                            <option value="ΧΩΡΙΣ SMART">ΧΩΡΙΣ SMART</option>
+                        </select>
+                    </div>
+
+                    <!-- Status -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Κατάσταση</label>
+                        <select name="status"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <option value="ΕΚΚΡΕΜΕΙ">ΕΚΚΡΕΜΕΙ</option>
+                            <option value="ΣΕ ΕΞΕΛΙΞΗ">ΣΕ ΕΞΕΛΙΞΗ</option>
+                            <option value="ΟΛΟΚΛΗΡΩΜΕΝΟ">ΟΛΟΚΛΗΡΩΜΕΝΟ</option>
+                            <option value="ΑΚΥΡΩΜΕΝΟ">ΑΚΥΡΩΜΕΝΟ</option>
+                        </select>
+                    </div>
+
+                    <!-- Ημερομηνία Autopsy -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Ημερομηνία Autopsy</label>
+                        <input type="date" name="autopsy_date"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    </div>
+
+                    <!-- Ημερομηνία Digging -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Ημερομηνία Digging</label>
+                        <input type="date" name="digging_date"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    </div>
+
+                    <!-- Ημερομηνία Construction -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Ημερομηνία Construction</label>
+                        <input type="date" name="construction_date"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    </div>
+
+                    <!-- Ημερομηνία Optical -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Ημερομηνία Optical</label>
+                        <input type="date" name="optical_date"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    </div>
+
+                    <!-- Γραμμογράφηση -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700">Γραμμογράφηση</label>
+                        <textarea name="line_recording" rows="3"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"></textarea>
+                    </div>
+
+                    <!-- Παρατηρήσεις -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700">Παρατηρήσεις</label>
+                        <textarea name="observations" rows="2"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"></textarea>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex justify-end gap-3">
+                    <button type="button" onclick="closeAddJobModal()"
+                        class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
+                        Ακύρωση
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">
+                        Αποθήκευση
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
+    <!-- Add Member Modal -->
+    <div id="add-member-modal"
+        class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-medium">Add Team Member</h3>
+                <button onclick="closeAddMemberModal()" class="text-gray-400 hover:text-gray-600 text-2xl">✕</button>
+            </div>
+            <form id="add-member-form" onsubmit="submitAddMember(event)">
+                <input type="hidden" name="team_type" id="member-team-type">
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Select User</label>
+                    <select name="user_id" id="member-user-select" required
+                        class="w-full px-3 py-2 border rounded-md focus:border-indigo-500 focus:ring-indigo-500">
+                        <option value="">Loading users...</option>
+                    </select>
+                </div>
+
+                <div class="flex justify-end gap-3">
+                    <button type="button" onclick="closeAddMemberModal()"
+                        class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">
+                        Add Member
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/app.js"></script>
     <script>
-        // Check if user is already logged in
-        fetch('/api/auth/session')
-            .then(r => r.json())
-            .then(data => {
-                if (data.authenticated) {
-                    // Already logged in - redirect to dashboard
-                    window.location.href = '/dashboard.html';
+        // Global user object
+        let currentUser = null;
+
+        // Check authentication and initialize dashboard
+        async function initDashboard() {
+            try {
+                const response = await fetch('/api/auth/session');
+                const data = await response.json();
+
+                if (!data.authenticated) {
+                    window.location.href = '/login.html';
+                    return;
                 }
-            });
+
+                currentUser = data.user;
+                document.getElementById('user-info').textContent = `${currentUser.name} (${currentUser.role})`;
+
+                // Show/hide tabs based on role
+                if (currentUser.role === 'ADMIN') {
+                    document.getElementById('tab-users').style.display = 'block';
+                    document.getElementById('tab-jobs').style.display = 'block';
+                    document.getElementById('tab-teams').style.display = 'block';
+                }
+
+                // Load initial data
+                loadSites();
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                window.location.href = '/login.html';
+            }
+        }
+
+        async function logout() {
+            try {
+                await fetch('/api/auth/logout', { method: 'POST' });
+                window.location.href = '/';
+            } catch (error) {
+                console.error('Logout failed:', error);
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', initDashboard);
     </script>
 </body>
 
