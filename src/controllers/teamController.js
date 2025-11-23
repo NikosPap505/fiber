@@ -21,10 +21,15 @@ class TeamController {
      */
     async addMember(req, res) {
         try {
-            const { job_sr_id, team_type, user_id, user_name } = req.body;
+            const { job_sr_id, team_type, user_id, user_name, is_custom } = req.body;
 
-            if (!job_sr_id || !team_type || !user_id || !user_name) {
+            if (!job_sr_id || !team_type || !user_name) {
                 return res.status(400).json({ error: 'Missing required fields' });
+            }
+
+            // For custom names, user_id can be null
+            if (!is_custom && !user_id) {
+                return res.status(400).json({ error: 'User ID required for registered users' });
             }
 
             const result = await teamService.addTeamMember(job_sr_id, team_type, user_id, user_name);

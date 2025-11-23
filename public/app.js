@@ -7,12 +7,14 @@ function switchTab(tab) {
     const reportsView = document.getElementById('view-reports');
     const usersView = document.getElementById('view-users');
     const jobsView = document.getElementById('view-jobs');
+    const dashboardView = document.getElementById('view-dashboard');
     const sitesTab = document.getElementById('tab-sites');
     const reportsTab = document.getElementById('tab-reports');
     const usersTab = document.getElementById('tab-users');
     const jobsTab = document.getElementById('tab-jobs');
     const teamsTab = document.getElementById('tab-teams');
     const teamsView = document.getElementById('view-teams');
+    const dashboardTab = document.getElementById('tab-dashboard');
 
     // Hide all views
     sitesView.classList.add('hidden');
@@ -20,9 +22,10 @@ function switchTab(tab) {
     usersView.classList.add('hidden');
     jobsView.classList.add('hidden');
     if (teamsView) teamsView.classList.add('hidden');
+    if (dashboardView) dashboardView.classList.add('hidden');
 
     // Reset all tabs
-    [sitesTab, reportsTab, usersTab, jobsTab, teamsTab].forEach(t => {
+    [sitesTab, reportsTab, usersTab, jobsTab, teamsTab, dashboardTab].forEach(t => {
         if (t) {
             t.classList.remove('border-indigo-500', 'text-indigo-600');
             t.classList.add('border-transparent', 'text-gray-500');
@@ -30,31 +33,47 @@ function switchTab(tab) {
     });
 
     // Show selected view and activate tab
-    if (tab === 'sites') {
-        sitesView.classList.remove('hidden');
-        sitesTab.classList.add('border-indigo-500', 'text-indigo-600');
-        sitesTab.classList.remove('border-transparent', 'text-gray-500');
-        loadSites();
-    } else if (tab === 'reports') {
-        reportsView.classList.remove('hidden');
-        reportsTab.classList.add('border-indigo-500', 'text-indigo-600');
-        reportsTab.classList.remove('border-transparent', 'text-gray-500');
-        loadReports();
-    } else if (tab === 'users') {
-        usersView.classList.remove('hidden');
-        usersTab.classList.add('border-indigo-500', 'text-indigo-600');
-        usersTab.classList.remove('border-transparent', 'text-gray-500');
-        loadUsers();
-    } else if (tab === 'jobs') {
-        jobsView.classList.remove('hidden');
-        jobsTab.classList.add('border-indigo-500', 'text-indigo-600');
-        jobsTab.classList.remove('border-transparent', 'text-gray-500');
-        loadJobs();
-    } else if (tab === 'teams') {
-        teamsView.classList.remove('hidden');
-        teamsTab.classList.add('border-indigo-500', 'text-indigo-600');
-        teamsTab.classList.remove('border-transparent', 'text-gray-500');
-        loadJobsForSelector();
+    if (tab === 'dashboard') {
+        dashboardView.classList.remove('hidden');
+        dashboardTab.classList.add('border-indigo-500', 'text-indigo-600');
+        dashboardTab.classList.remove('border-transparent', 'text-gray-500');
+        // Load dashboard and start auto-refresh
+        if (window.DashboardStats) {
+            window.DashboardStats.loadDashboard();
+            window.DashboardStats.startDashboardRefresh(30000); // 30 seconds
+        }
+    } else {
+        // Stop dashboard refresh when leaving dashboard
+        if (window.DashboardStats) {
+            window.DashboardStats.stopDashboardRefresh();
+        }
+
+        if (tab === 'sites') {
+            sitesView.classList.remove('hidden');
+            sitesTab.classList.add('border-indigo-500', 'text-indigo-600');
+            sitesTab.classList.remove('border-transparent', 'text-gray-500');
+            loadSites();
+        } else if (tab === 'reports') {
+            reportsView.classList.remove('hidden');
+            reportsTab.classList.add('border-indigo-500', 'text-indigo-600');
+            reportsTab.classList.remove('border-transparent', 'text-gray-500');
+            loadReports();
+        } else if (tab === 'users') {
+            usersView.classList.remove('hidden');
+            usersTab.classList.add('border-indigo-500', 'text-indigo-600');
+            usersTab.classList.remove('border-transparent', 'text-gray-500');
+            loadUsers();
+        } else if (tab === 'jobs') {
+            jobsView.classList.remove('hidden');
+            jobsTab.classList.add('border-indigo-500', 'text-indigo-600');
+            jobsTab.classList.remove('border-transparent', 'text-gray-500');
+            loadJobs();
+        } else if (tab === 'teams') {
+            teamsView.classList.remove('hidden');
+            teamsTab.classList.add('border-indigo-500', 'text-indigo-600');
+            teamsTab.classList.remove('border-transparent', 'text-gray-500');
+            loadJobsForSelector();
+        }
     }
 }
 
@@ -115,6 +134,8 @@ async function loadSites() {
     }
 }
 
+// loadJobs is now handled in jobFilters.js
+
 // Load reports
 async function loadReports() {
     try {
@@ -127,6 +148,9 @@ async function loadReports() {
 
         reports.forEach(report => {
             const tr = document.createElement('tr');
+
+            // Debug logging
+            console.log('Report:', report.report_id, 'photo_url:', report.photo_url);
 
             // Type badge color
             let typeClass = '';
@@ -156,10 +180,14 @@ async function loadReports() {
             const date = new Date(report.date);
             const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
 
-            // Photo cell
-            const photoCell = report.photo_url
-                ? `<a href="/api/photo/${report.photo_url}" target="_blank" class="text-2xl hover:opacity-75 cursor-pointer" title="View photo">📷</a>`
-                : '-';
+            // Photo cell - photo_url contains the Telegram file_id
+            let photoCell = '-';
+            if (report.photo_url && report.photo_url.trim() !== '') {
+                photoCell = `<a href="/api/photo/${report.photo_url}" target="_blank" class="text-2xl hover:opacity-75 cursor-pointer" title="View photo">📷</a>`;
+                console.log('Photo link created for:', report.report_id);
+            } else {
+                console.log('No photo for report:', report.report_id);
+            }
 
             // Comments cell (truncate if too long)
             const comments = report.comments || '-';
@@ -169,18 +197,16 @@ async function loadReports() {
                 : '-';
 
             tr.innerHTML = `
-                <td class="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-sm font-medium text-gray-900">${report.report_id}</td>
                 <td class="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${typeClass}">
                         ${report.type}
                     </span>
                 </td>
-                <td class="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-sm text-gray-500">${report.site_id}</td>
-                <td class="px-3 sm:px-6 py-2 sm:py-4 text-sm text-gray-500">${report.user_id}</td>
-                <td class="px-3 sm:px-6 py-2 sm:py-4 text-sm text-gray-500">${formattedDate}</td>
+                <td class="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-sm text-gray-900">${report.site_name || report.site_id || '-'}</td>
+                <td class="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-sm text-gray-500">${report.user_name || report.user_id || '-'}</td>
                 <td class="px-3 sm:px-6 py-2 sm:py-4 text-sm text-gray-500">${details}</td>
                 <td class="px-3 sm:px-6 py-2 sm:py-4 text-sm text-center">${photoCell}</td>
-                <td class="px-3 sm:px-6 py-2 sm:py-4 text-sm text-gray-500">${commentsCell}</td>
+                <td class="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-sm text-gray-500">${formattedDate}</td>
             `;
             tbody.appendChild(tr);
         });
@@ -191,51 +217,7 @@ async function loadReports() {
     }
 }
 
-// Load users
-async function loadUsers() {
-    try {
-        const response = await fetch('/api/users');
-        const users = await response.json();
-        allUsers = users; // Cache for later use
-
-        const tbody = document.getElementById('users-table-body');
-        tbody.innerHTML = '';
-
-        users.forEach(user => {
-            const tr = document.createElement('tr');
-
-            // Role badge color
-            let roleClass = 'bg-gray-100 text-gray-800';
-            if (user.role === 'WORKER_CONSTRUCTION') roleClass = 'bg-blue-100 text-blue-800';
-            else if (user.role === 'WORKER_DIGGING') roleClass = 'bg-orange-100 text-orange-800';
-            else if (user.role === 'WORKER_OPTICAL') roleClass = 'bg-green-100 text-green-800';
-            else if (user.role === 'ADMIN') roleClass = 'bg-purple-100 text-purple-800';
-
-            const statusClass = user.active === 'YES' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
-
-            tr.innerHTML = `
-                <td class="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-sm font-medium text-gray-900">${user.user_id}</td>
-                <td class="px-3 sm:px-6 py-2 sm:py-4 text-sm text-gray-500">${user.name}</td>
-                <td class="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
-                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${roleClass}">
-                        ${user.role}
-                    </span>
-                </td>
-                <td class="px-3 sm:px-6 py-2 sm:py-4 text-sm text-gray-500">${user.telegram_chat_id || '-'}</td>
-                <td class="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
-                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClass}">
-                        ${user.active || 'YES'}
-                    </span>
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
-
-    } catch (error) {
-        console.error('Error loading users:', error);
-        alert('Failed to load users');
-    }
-}
+// loadJobs is now handled in jobFilters.js
 
 // Assign worker to site
 async function assignWorker(siteId, userId) {
@@ -474,6 +456,22 @@ async function editJob(srId) {
     }
 }
 
+// Toggle export menu
+function toggleExportMenu() {
+    const menu = document.getElementById('export-menu');
+    menu.classList.toggle('hidden');
+}
+
+// Close export menu when clicking outside
+document.addEventListener('click', function (event) {
+    const menu = document.getElementById('export-menu');
+    const button = event.target.closest('button[onclick="toggleExportMenu()"]');
+
+    if (menu && !menu.contains(event.target) && !button) {
+        menu.classList.add('hidden');
+    }
+});
+
 async function deleteJob(srId) {
     if (!confirm(`Are you sure you want to delete job ${srId}?`)) {
         return;
@@ -544,6 +542,14 @@ async function loadTeamsForJob() {
         return;
     }
 
+    // Show loading skeletons
+    ['autopsy', 'construction', 'digging', 'optical'].forEach(type => {
+        const container = document.getElementById(`team-${type}`);
+        if (window.UIComponents) {
+            window.UIComponents.showLoadingSkeleton(`team-${type}`, 'cards');
+        }
+    });
+
     try {
         const response = await fetch(`/api/teams/${jobSrId}`);
         const teams = await response.json();
@@ -555,23 +561,62 @@ async function loadTeamsForJob() {
             const container = document.getElementById(containerId);
             const members = teams[type];
 
+            // Update member count badge
+            const badgeId = `badge-${type.toLowerCase()}`;
+            const badge = document.getElementById(badgeId);
+            if (badge) {
+                const count = members.length;
+                badge.textContent = `${count} member${count !== 1 ? 's' : ''}`;
+            }
+
             if (members.length === 0) {
                 container.innerHTML = '<p class="text-sm text-gray-500">No members assigned</p>';
             } else {
-                container.innerHTML = members.map(member => `
-                    <div class="flex justify-between items-center bg-white p-2 rounded border text-sm">
-                        <div>
-                            <span class="font-medium">${member.user_name}</span>
-                            <div class="text-xs text-gray-500">Assigned: ${member.assigned_date}</div>
+                container.innerHTML = members.map(member => {
+                    // Generate avatar with initials
+                    const initials = member.user_name
+                        .split(' ')
+                        .map(n => n[0])
+                        .join('')
+                        .toUpperCase()
+                        .substring(0, 2);
+
+                    // Color based on team type
+                    const avatarColors = {
+                        'AUTOPSY': 'bg-yellow-500',
+                        'DIGGING': 'bg-orange-500',
+                        'CONSTRUCTION': 'bg-blue-500',
+                        'OPTICAL': 'bg-green-500'
+                    };
+
+                    return `
+                        <div class="flex items-center justify-between bg-white p-3 rounded-lg border border-gray-200 hover:shadow-md transition-shadow">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full ${avatarColors[type]} flex items-center justify-center text-white font-semibold text-sm">
+                                    ${initials}
+                                </div>
+                                <div>
+                                    <div class="font-medium text-gray-900">${member.user_name}</div>
+                                    <div class="text-xs text-gray-500">Assigned: ${member.assigned_date}</div>
+                                </div>
+                            </div>
+                            <button onclick="removeMember('${member.team_id}')" 
+                                    class="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded transition-colors"
+                                    title="Remove member">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
                         </div>
-                        <button onclick="removeMember('${member.team_id}')" class="text-red-500 hover:text-red-700">✕</button>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
             }
         });
     } catch (error) {
         console.error('Error loading teams:', error);
-        alert('Failed to load teams');
+        if (window.UIComponents) {
+            window.UIComponents.showToast('Failed to load teams', 'error');
+        }
     }
 }
 
@@ -615,9 +660,27 @@ async function showAddMemberModal(teamType) {
     }
 }
 
+// Toggle between registered user and custom name
+function toggleMemberType() {
+    const memberType = document.querySelector('input[name="member_type"]:checked').value;
+    const registeredSection = document.getElementById('registered-user-section');
+    const customSection = document.getElementById('custom-name-section');
+
+    if (memberType === 'registered') {
+        registeredSection.classList.remove('hidden');
+        customSection.classList.add('hidden');
+    } else {
+        registeredSection.classList.add('hidden');
+        customSection.classList.remove('hidden');
+    }
+}
+
 function closeAddMemberModal() {
     document.getElementById('add-member-modal').classList.add('hidden');
     document.getElementById('add-member-form').reset();
+    // Reset to registered user view
+    document.getElementById('registered-user-section').classList.remove('hidden');
+    document.getElementById('custom-name-section').classList.add('hidden');
 }
 
 async function submitAddMember(event) {
@@ -625,9 +688,34 @@ async function submitAddMember(event) {
 
     const jobSrId = document.getElementById('team-job-selector').value;
     const teamType = document.getElementById('member-team-type').value;
-    const userSelect = document.getElementById('member-user-select');
-    const userId = userSelect.value;
-    const userName = userSelect.options[userSelect.selectedIndex].dataset.name;
+    const memberType = document.querySelector('input[name="member_type"]:checked').value;
+
+    let userId, userName;
+
+    if (memberType === 'registered') {
+        const userSelect = document.getElementById('member-user-select');
+        userId = userSelect.value;
+        userName = userSelect.options[userSelect.selectedIndex].dataset.name;
+
+        if (!userId) {
+            if (window.UIComponents) {
+                window.UIComponents.showToast('Please select a user', 'error');
+            }
+            return;
+        }
+    } else {
+        // Custom name
+        const customNameInput = document.getElementById('custom-member-name');
+        userName = customNameInput.value.trim();
+        userId = null; // No user ID for custom names
+
+        if (!userName) {
+            if (window.UIComponents) {
+                window.UIComponents.showToast('Please enter a member name', 'error');
+            }
+            return;
+        }
+    }
 
     try {
         const response = await fetch('/api/teams', {
@@ -637,25 +725,42 @@ async function submitAddMember(event) {
                 job_sr_id: jobSrId,
                 team_type: teamType,
                 user_id: userId,
-                user_name: userName
+                user_name: userName,
+                is_custom: memberType === 'custom'
             })
         });
 
         if (response.ok) {
             closeAddMemberModal();
             loadTeamsForJob(); // Refresh teams
+            if (window.UIComponents) {
+                window.UIComponents.showToast('Member added successfully!', 'success');
+            }
         } else {
             const error = await response.json();
-            alert('Failed to add member: ' + error.error);
+            if (window.UIComponents) {
+                window.UIComponents.showToast('Failed to add member: ' + error.error, 'error');
+            } else {
+                alert('Failed to add member: ' + error.error);
+            }
         }
     } catch (error) {
         console.error('Error adding member:', error);
-        alert('Failed to add member');
+        if (window.UIComponents) {
+            window.UIComponents.showToast('Failed to add member', 'error');
+        } else {
+            alert('Failed to add member');
+        }
     }
 }
 
 async function removeMember(teamId) {
-    if (!confirm('Are you sure you want to remove this member?')) return;
+    // Use custom confirm dialog if available, otherwise fallback to native confirm
+    const confirmed = window.UIComponents
+        ? await window.UIComponents.showConfirmDialog('Are you sure you want to remove this member?')
+        : confirm('Are you sure you want to remove this member?');
+
+    if (!confirmed) return;
 
     try {
         const response = await fetch(`/api/teams/${teamId}`, {
@@ -664,11 +769,23 @@ async function removeMember(teamId) {
 
         if (response.ok) {
             loadTeamsForJob(); // Refresh teams
+            if (window.UIComponents) {
+                window.UIComponents.showToast('Member removed successfully', 'success');
+            }
         } else {
-            alert('Failed to remove member');
+            const error = await response.json();
+            if (window.UIComponents) {
+                window.UIComponents.showToast('Failed to remove member: ' + error.error, 'error');
+            } else {
+                alert('Failed to remove member: ' + error.error);
+            }
         }
     } catch (error) {
         console.error('Error removing member:', error);
-        alert('Failed to remove member');
+        if (window.UIComponents) {
+            window.UIComponents.showToast('Failed to remove member', 'error');
+        } else {
+            alert('Failed to remove member');
+        }
     }
 }

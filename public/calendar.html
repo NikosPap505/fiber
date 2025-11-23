@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="el">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar - Fiber Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/styles.css">
+    <!-- FullCalendar CSS -->
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css' rel='stylesheet' />
+</head>
+
+<body class="bg-gray-50">
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-white shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-4">
+                        <a href="/dashboard.html" class="text-indigo-600 hover:text-indigo-800 flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                            </svg>
+                            Back to Dashboard
+                        </a>
+                        <h1 class="text-2xl font-bold text-gray-900">📅 Calendar View</h1>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <!-- Dark Mode Toggle -->
+                        <button id="theme-toggle" onclick="window.UIComponents?.toggleDarkMode()"
+                            class="p-2 rounded-lg hover:bg-gray-100 transition-colors" title="Toggle dark mode">
+                            <span class="text-2xl">🌙</span>
+                        </button>
+                        <div class="text-sm text-gray-600">
+                            <span id="user-info">Loading...</span>
+                        </div>
+                        <button onclick="logout()" class="text-red-600 hover:text-red-800 text-sm font-medium">
+                            Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Filters -->
+            <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                <h2 class="text-lg font-semibold mb-4">Filters</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Status Filter -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                        <select id="filter-status" onchange="loadCalendarEvents()"
+                            class="w-full px-3 py-2 border rounded-md focus:border-indigo-500 focus:ring-indigo-500">
+                            <option value="">All Statuses</option>
+                            <option value="ΕΚΚΡΕΜΕΙ">ΕΚΚΡΕΜΕΙ</option>
+                            <option value="ΣΕ ΕΞΕΛΙΞΗ">ΣΕ ΕΞΕΛΙΞΗ</option>
+                            <option value="ΟΛΟΚΛΗΡΩΘΗΚΕ">ΟΛΟΚΛΗΡΩΘΗΚΕ</option>
+                        </select>
+                    </div>
+
+                    <!-- Type Filter -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Job Type</label>
+                        <select id="filter-type" onchange="loadCalendarEvents()"
+                            class="w-full px-3 py-2 border rounded-md focus:border-indigo-500 focus:ring-indigo-500">
+                            <option value="">All Types</option>
+                            <option value="Autopsy">Autopsy</option>
+                            <option value="Digging">Digging</option>
+                            <option value="Construction">Construction</option>
+                            <option value="Optical">Optical</option>
+                        </select>
+                    </div>
+
+                    <!-- Legend -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Legend</label>
+                        <div class="space-y-1 text-sm">
+                            <div class="flex items-center gap-2">
+                                <span class="w-4 h-4 rounded" style="background-color: #F59E0B;"></span>
+                                <span>Autopsy</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-4 h-4 rounded" style="background-color: #F97316;"></span>
+                                <span>Digging</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-4 h-4 rounded" style="background-color: #3B82F6;"></span>
+                                <span>Construction</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-4 h-4 rounded" style="background-color: #10B981;"></span>
+                                <span>Optical</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calendar -->
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <div id="calendar"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Event Details Modal -->
+    <div id="event-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold" id="modal-title">Job Details</h3>
+                <button onclick="closeEventModal()" class="text-gray-400 hover:text-gray-600 text-2xl">✕</button>
+            </div>
+            <div id="modal-content" class="space-y-3">
+                <!-- Populated by JavaScript -->
+            </div>
+            <div class="mt-6 flex justify-end gap-3">
+                <button onclick="closeEventModal()"
+                    class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+    <script src="/ui-components.js"></script>
+    <script>
+        let calendar;
+        let currentUser = null;
+
+        // Initialize calendar
+        document.addEventListener('DOMContentLoaded', async function () {
+            // Check authentication
+            try {
+                const response = await fetch('/api/auth/session');
+                const data = await response.json();
+
+                if (!data.authenticated) {
+                    window.location.href = '/login.html';
+                    return;
+                }
+
+                currentUser = data.user;
+                document.getElementById('user-info').textContent = `${currentUser.name} (${currentUser.role})`;
+
+                // Only admins can access calendar
+                if (currentUser.role !== 'ADMIN') {
+                    window.UIComponents?.showToast('Access denied - Admin only', 'error');
+                    setTimeout(() => window.location.href = '/dashboard.html', 2000);
+                    return;
+                }
+
+                // Initialize theme
+                if (window.UIComponents) {
+                    window.UIComponents.initTheme();
+                }
+
+                // Initialize FullCalendar
+                const calendarEl = document.getElementById('calendar');
+                calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'dayGridMonth',
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+                    },
+                    buttonText: {
+                        today: 'Today',
+                        month: 'Month',
+                        week: 'Week',
+                        day: 'Day',
+                        list: 'List'
+                    },
+                    height: 'auto',
+                    events: loadCalendarEvents,
+                    eventClick: function (info) {
+                        showEventDetails(info.event);
+                    },
+                    eventDidMount: function (info) {
+                        // Add tooltip
+                        info.el.title = `${info.event.title}\nStatus: ${info.event.extendedProps.status}`;
+                    }
+                });
+
+                calendar.render();
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                window.location.href = '/login.html';
+            }
+        });
+
+        // Load calendar events
+        async function loadCalendarEvents(fetchInfo, successCallback, failureCallback) {
+            try {
+                const status = document.getElementById('filter-status')?.value || '';
+                const type = document.getElementById('filter-type')?.value || '';
+
+                let url = '/api/calendar/events?';
+                if (fetchInfo) {
+                    url += `start=${fetchInfo.startStr}&end=${fetchInfo.endStr}&`;
+                }
+                if (status) url += `status=${encodeURIComponent(status)}&`;
+                if (type) url += `type=${encodeURIComponent(type)}&`;
+
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error('Failed to load events');
+                }
+
+                const events = await response.json();
+
+                if (successCallback) {
+                    successCallback(events);
+                } else {
+                    // Refetch events when filters change
+                    calendar.refetchEvents();
+                }
+            } catch (error) {
+                console.error('Error loading calendar events:', error);
+                if (window.UIComponents) {
+                    window.UIComponents.showToast('Failed to load calendar events', 'error');
+                }
+                if (failureCallback) {
+                    failureCallback(error);
+                }
+            }
+        }
+
+        // Show event details modal
+        function showEventDetails(event) {
+            const props = event.extendedProps;
+
+            document.getElementById('modal-title').textContent = event.title;
+            document.getElementById('modal-content').innerHTML = `
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">SR ID</p>
+                        <p class="text-base text-gray-900">${props.sr_id}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Status</p>
+                        <p class="text-base text-gray-900">${props.status}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Type</p>
+                        <p class="text-base text-gray-900">${props.type}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Date</p>
+                        <p class="text-base text-gray-900">${event.start.toLocaleDateString('el-GR')}</p>
+                    </div>
+                    <div class="col-span-2">
+                        <p class="text-sm font-medium text-gray-500">Customer</p>
+                        <p class="text-base text-gray-900">${props.customer_name || 'N/A'}</p>
+                    </div>
+                    <div class="col-span-2">
+                        <p class="text-sm font-medium text-gray-500">Phone</p>
+                        <p class="text-base text-gray-900">${props.customer_phone || 'N/A'}</p>
+                    </div>
+                    <div class="col-span-2">
+                        <p class="text-sm font-medium text-gray-500">Address</p>
+                        <p class="text-base text-gray-900">${props.address || 'N/A'}</p>
+                    </div>
+                    <div class="col-span-2">
+                        <p class="text-sm font-medium text-gray-500">Area</p>
+                        <p class="text-base text-gray-900">${props.area || 'N/A'}</p>
+                    </div>
+                    <div class="col-span-2">
+                        <p class="text-sm font-medium text-gray-500">CAB</p>
+                        <p class="text-base text-gray-900">${props.cab || 'N/A'}</p>
+                    </div>
+                    ${props.notes ? `
+                        <div class="col-span-2">
+                            <p class="text-sm font-medium text-gray-500">Notes</p>
+                            <p class="text-base text-gray-900">${props.notes}</p>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+
+            document.getElementById('event-modal').classList.remove('hidden');
+        }
+
+        // Close event modal
+        function closeEventModal() {
+            document.getElementById('event-modal').classList.add('hidden');
+        }
+
+        // Logout
+        async function logout() {
+            try {
+                await fetch('/api/auth/logout', { method: 'POST' });
+                window.location.href = '/';
+            } catch (error) {
+                console.error('Logout failed:', error);
+            }
+        }
+    </script>
+</body>
+
+</html>

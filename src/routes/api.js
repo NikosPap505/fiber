@@ -38,4 +38,21 @@ router.get('/teams/available/:team_type', requireAdmin, teamController.getAvaila
 router.post('/teams', requireAdmin, teamController.addMember);
 router.delete('/teams/:team_id', requireAdmin, teamController.removeMember);
 
+// Statistics routes (admin only)
+const statsController = require('../controllers/statsController');
+router.get('/stats/overview', requireAdmin, statsController.getOverview);
+router.get('/stats/jobs-by-status', requireAdmin, statsController.getJobsByStatus);
+router.get('/stats/jobs-by-type', requireAdmin, statsController.getJobsByType);
+router.get('/stats/team-workload', requireAdmin, statsController.getTeamWorkload);
+router.get('/stats/timeline', requireAdmin, statsController.getJobsTimeline);
+router.get('/stats/all', requireAdmin, statsController.getAllStats);
+
+// Calendar routes (admin only)
+const calendarController = require('../controllers/calendarController');
+router.get('/calendar/events', requireAdmin, calendarController.getEvents);
+
+// Export routes (admin only)
+const exportController = require('../controllers/exportController');
+router.get('/export/jobs', requireAdmin, exportController.exportJobs);
+
 module.exports = router;

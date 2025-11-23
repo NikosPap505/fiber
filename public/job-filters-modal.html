@@ -1,0 +1,79 @@
+<!-- Job Filters Modal -->
+<div id="job-filters-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-medium">Advanced Filters - Jobs</h3>
+            <button onclick="closeJobFiltersModal()" class="text-gray-400 hover:text-gray-600 text-2xl">✕</button>
+        </div>
+
+        <form id="job-filters-form" onsubmit="applyJobFilters(event)">
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <!-- Date Range -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Date From</label>
+                    <input type="date" id="filter-date-from"
+                        class="w-full px-3 py-2 border rounded-md focus:border-indigo-500 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Date To</label>
+                    <input type="date" id="filter-date-to"
+                        class="w-full px-3 py-2 border rounded-md focus:border-indigo-500 focus:ring-indigo-500">
+                </div>
+
+                <!-- Status -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                    <select id="filter-status"
+                        class="w-full px-3 py-2 border rounded-md focus:border-indigo-500 focus:ring-indigo-500">
+                        <option value="">All Statuses</option>
+                        <option value="ΕΚΚΡΕΜΕΙ">ΕΚΚΡΕΜΕΙ</option>
+                        <option value="ΣΕ ΕΞΕΛΙΞΗ">ΣΕ ΕΞΕΛΙΞΗ</option>
+                        <option value="ΟΛΟΚΛΗΡΩΘΗΚΕ">ΟΛΟΚΛΗΡΩΘΗΚΕ</option>
+                    </select>
+                </div>
+
+                <!-- Type -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Job Type</label>
+                    <select id="filter-type"
+                        class="w-full px-3 py-2 border rounded-md focus:border-indigo-500 focus:ring-indigo-500">
+                        <option value="">All Types</option>
+                        <option value="Autopsy">Autopsy</option>
+                        <option value="Digging">Digging</option>
+                        <option value="Construction">Construction</option>
+                        <option value="Optical">Optical</option>
+                    </select>
+                </div>
+
+                <!-- Area -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Area</label>
+                    <input type="text" id="filter-area" placeholder="Search by area"
+                        class="w-full px-3 py-2 border rounded-md focus:border-indigo-500 focus:ring-indigo-500">
+                </div>
+
+                <!-- Customer -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Customer</label>
+                    <input type="text" id="filter-customer" placeholder="Search by customer"
+                        class="w-full px-3 py-2 border rounded-md focus:border-indigo-500 focus:ring-indigo-500">
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center pt-4 border-t">
+                <button type="button" onclick="clearJobFilters()" class="text-sm text-gray-600 hover:text-gray-800">
+                    Clear Filters
+                </button>
+                <div class="flex gap-3">
+                    <button type="button" onclick="closeJobFiltersModal()"
+                        class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">
+                        Apply Filters
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
