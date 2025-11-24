@@ -476,3 +476,260 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ============================================
+   RESPONSIVE TABLES
+   ============================================ */
+
+/* Mobile: Hide less important columns */
+@media (max-width: 640px) {
+  .mobile-hidden {
+    display: none !important;
+  }
+  
+  /* Make tables scrollable on mobile */
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Compact table cells on mobile */
+  table td,
+  table th {
+    padding: 0.5rem !important;
+    font-size: 0.875rem !important;
+  }
+  
+  /* Stack table actions vertically on mobile */
+  .table-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  
+  .table-actions button {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* Tablet: Show some columns */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .tablet-hidden {
+    display: none !important;
+  }
+}
+
+/* Touch-friendly buttons */
+@media (max-width: 640px) {
+  button,
+  a.button,
+  input[type="button"],
+  input[type="submit"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Larger tap targets for mobile */
+  .tap-target {
+    padding: 0.75rem !important;
+  }
+}
+
+/* Mobile-optimized modals */
+@media (max-width: 640px) {
+  .modal-content {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+  }
+  
+  .modal-container {
+    padding: 0 !important;
+  }
+}
+
+/* Bottom navigation active state */
+.bottom-nav-item.active {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.bottom-nav-item.active svg {
+  stroke-width: 2.5;
+}
+
+/* Mobile menu slide animation */
+#mobile-menu .fixed.inset-y-0 {
+  transform: translateX(-100%);
+  transition: transform 300ms ease-in-out;
+}
+
+#mobile-menu:not(.hidden) .fixed.inset-y-0 {
+  transform: translateX(0);
+}
+
+/* ============================================
+   MOBILE CONTENT OPTIMIZATION
+   ============================================ */
+
+/* Forms and Inputs */
+@media (max-width: 640px) {
+  /* Full width inputs on mobile */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="date"],
+  input[type="time"],
+  input[type="tel"],
+  select,
+  textarea {
+    width: 100% !important;
+    font-size: 16px !important; /* Prevents zoom on iOS */
+  }
+  
+  /* Larger select dropdowns for touch */
+  select {
+    min-height: 44px !important;
+    padding: 0.75rem !important;
+  }
+  
+  /* Form labels */
+  label {
+    font-size: 0.875rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+  
+  /* Form groups spacing */
+  .form-group,
+  form > div {
+    margin-bottom: 1rem !important;
+  }
+}
+
+/* Table Responsiveness */
+@media (max-width: 640px) {
+  /* Wrap tables in scrollable container */
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Compact table styling */
+  table {
+    font-size: 0.875rem !important;
+  }
+  
+  table thead {
+    font-size: 0.75rem !important;
+  }
+  
+  /* Hide specific columns on mobile */
+  table th:nth-child(n+5),
+  table td:nth-child(n+5) {
+    display: none;
+  }
+  
+  /* Show only first 4 columns on mobile */
+  table.mobile-compact th:nth-child(n+4),
+  table.mobile-compact td:nth-child(n+4) {
+    display: none;
+  }
+}
+
+/* Modal Adjustments */
+@media (max-width: 640px) {
+  /* Full screen modals on mobile */
+  [class*="max-w-"] {
+    max-width: 100% !important;
+  }
+  
+  .modal-content,
+  [role="dialog"] > div {
+    margin: 0 !important;
+    border-radius: 0 !important;
+    max-height: 100vh !important;
+    overflow-y: auto !important;
+  }
+  
+  /* Modal headers */
+  .modal-header,
+  [role="dialog"] h2 {
+    position: sticky !important;
+    top: 0 !important;
+    background: white !important;
+    z-index: 10 !important;
+    padding: 1rem !important;
+    border-bottom: 1px solid #e5e7eb !important;
+  }
+  
+  /* Modal footers */
+  .modal-footer {
+    position: sticky !important;
+    bottom: 0 !important;
+    background: white !important;
+    padding: 1rem !important;
+    border-top: 1px solid #e5e7eb !important;
+  }
+}
+
+/* Cards and Containers */
+@media (max-width: 640px) {
+  /* Reduce padding on cards */
+  .card,
+  [class*="rounded-lg"][class*="p-"] {
+    padding: 1rem !important;
+  }
+  
+  /* Stack card content vertically */
+  .card .flex {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+  
+  /* Full width buttons in cards */
+  .card button,
+  .card a.button {
+    width: 100% !important;
+    margin-top: 0.5rem !important;
+  }
+}
+
+/* Typography */
+@media (max-width: 640px) {
+  h1 { font-size: 1.5rem !important; }
+  h2 { font-size: 1.25rem !important; }
+  h3 { font-size: 1.125rem !important; }
+  h4 { font-size: 1rem !important; }
+  
+  /* Reduce spacing */
+  .space-y-6 > * + * {
+    margin-top: 1rem !important;
+  }
+  
+  .space-y-4 > * + * {
+    margin-top: 0.75rem !important;
+  }
+}
+
+/* Utility Classes */
+@media (max-width: 640px) {
+  .mobile-full-width {
+    width: 100% !important;
+  }
+  
+  .mobile-text-center {
+    text-align: center !important;
+  }
+  
+  .mobile-p-4 {
+    padding: 1rem !important;
+  }
+  
+  .mobile-mt-4 {
+    margin-top: 1rem !important;
+  }
+}

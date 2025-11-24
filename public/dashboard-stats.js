@@ -66,7 +66,7 @@ async function loadJobsByStatusChart() {
                     backgroundColor: [
                         '#F59E0B', // Warning - ΕΚΚΡΕΜΕΙ
                         '#3B82F6', // Info - In Progress
-                        '#10B981', // Success - ΟΛΟΚΛΗΡΩΘΗΚΕ
+                        '#10B981', // Success - ΟΛΟΚΛΗΡΩΜΕΝΟ
                         '#EF4444', // Error - Other
                     ],
                     borderWidth: 2,

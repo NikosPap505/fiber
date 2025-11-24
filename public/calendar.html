@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="/styles.css">
     <!-- FullCalendar CSS -->
-    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css' rel='stylesheet' />
+    <!-- FullCalendar CSS is included in the JS bundle for v6 -->
 </head>
 
 <body class="bg-gray-50">
@@ -58,7 +58,7 @@
                             <option value="">All Statuses</option>
                             <option value="ΕΚΚΡΕΜΕΙ">ΕΚΚΡΕΜΕΙ</option>
                             <option value="ΣΕ ΕΞΕΛΙΞΗ">ΣΕ ΕΞΕΛΙΞΗ</option>
-                            <option value="ΟΛΟΚΛΗΡΩΘΗΚΕ">ΟΛΟΚΛΗΡΩΘΗΚΕ</option>
+                            <option value="ΟΛΟΚΛΗΡΩΜΕΝΟ">ΟΛΟΚΛΗΡΩΜΕΝΟ</option>
                         </select>
                     </div>
 
@@ -209,7 +209,9 @@
 
                 const response = await fetch(url);
                 if (!response.ok) {
-                    throw new Error('Failed to load events');
+                    const errorData = await response.json().catch(() => ({}));
+                    console.error('Server error details:', errorData);
+                    throw new Error(errorData.details || 'Failed to load events');
                 }
 
                 const events = await response.json();
@@ -237,7 +239,7 @@
 
             document.getElementById('modal-title').textContent = event.title;
             document.getElementById('modal-content').innerHTML = `
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <p class="text-sm font-medium text-gray-500">SR ID</p>
                         <p class="text-base text-gray-900">${props.sr_id}</p>

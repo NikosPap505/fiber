@@ -19,9 +19,9 @@ async function getOverviewStats() {
         const total = jobs.length;
         const pending = jobs.filter(j => j.status === 'ΕΚΚΡΕΜΕΙ' || !j.status).length;
         const inProgress = jobs.filter(j =>
-            j.status && j.status !== 'ΕΚΚΡΕΜΕΙ' && j.status !== 'ΟΛΟΚΛΗΡΩΘΗΚΕ'
+            j.status && j.status !== 'ΕΚΚΡΕΜΕΙ' && j.status !== 'ΟΛΟΚΛΗΡΩΜΕΝΟ'
         ).length;
-        const completed = jobs.filter(j => j.status === 'ΟΛΟΚΛΗΡΩΘΗΚΕ').length;
+        const completed = jobs.filter(j => j.status === 'ΟΛΟΚΛΗΡΩΜΕΝΟ').length;
 
         // Count active teams (jobs with at least one team member)
         let activeTeams = 0;

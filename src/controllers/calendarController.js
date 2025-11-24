@@ -27,7 +27,8 @@ async function getEvents(req, res) {
 
                 // Parse date (handle M/D/Y format from Excel/Sheets)
                 let jobDate;
-                const dateStr = job.appointment_date;
+                // Ensure dateStr is a string
+                const dateStr = String(job.appointment_date);
 
                 // Try parsing M/D/Y (e.g. 11/23/2025)
                 const parts = dateStr.split('/');
@@ -38,7 +39,7 @@ async function getEvents(req, res) {
                     jobDate = new Date(year, month, day);
                 } else {
                     // Fallback to standard parsing
-                    jobDate = new Date(dateStr);
+                    jobDate = new Date(job.appointment_date);
                 }
 
                 if (isNaN(jobDate.getTime())) return false;
@@ -63,6 +64,21 @@ async function getEvents(req, res) {
             })
             .map(job => {
                 // Map job to FullCalendar event format
+                // Determine type if not explicitly set
+                let jobType = job.type || job.phase || 'Unknown';
+                if (jobType === 'Unknown') {
+                    if (job.autopsy_date) jobType = 'Autopsy';
+                    else if (job.digging_date) jobType = 'Digging';
+                    else if (job.construction_date) jobType = 'Construction';
+                    else if (job.optical_date) jobType = 'Optical';
+                }
+
+                // Normalize type for color mapping
+                if (jobType.includes('ΑΥΤΟΨΙΑ') || jobType.includes('Autopsy')) jobType = 'Autopsy';
+                else if (jobType.includes('ΧΩΜΑΤΟΥΡΓΙΚΑ') || jobType.includes('Digging')) jobType = 'Digging';
+                else if (jobType.includes('ΚΑΘΕΤΟ') || jobType.includes('Construction')) jobType = 'Construction';
+                else if (jobType.includes('ΟΠΤΙΚΟ') || jobType.includes('Optical')) jobType = 'Optical';
+
                 const typeColors = {
                     'Autopsy': '#F59E0B',      // Yellow
                     'Digging': '#F97316',      // Orange
@@ -73,25 +89,25 @@ async function getEvents(req, res) {
                 const statusBorderColors = {
                     'ΕΚΚΡΕΜΕΙ': '#DC2626',           // Red border
                     'ΣΕ ΕΞΕΛΙΞΗ': '#2563EB',         // Blue border
-                    'ΟΛΟΚΛΗΡΩΘΗΚΕ': '#059669'        // Green border
+                    'ΟΛΟΚΛΗΡΩΜΕΝΟ': '#059669'        // Green border
                 };
 
                 return {
                     id: job.sr_id,
-                    title: `${job.type} - ${job.customer_name || 'N/A'}`,
+                    title: `${jobType} - ${job.customer || 'N/A'}`,
                     start: job._parsedDate.toISOString().split('T')[0], // Use YYYY-MM-DD format
-                    backgroundColor: typeColors[job.type] || '#6B7280',
+                    backgroundColor: typeColors[jobType] || '#6B7280',
                     borderColor: statusBorderColors[job.status] || '#374151',
                     extendedProps: {
                         sr_id: job.sr_id,
                         address: job.address,
                         area: job.area,
-                        customer_name: job.customer_name,
+                        customer_name: job.customer, // Map 'customer' to 'customer_name' for frontend consistency
                         customer_phone: job.customer_phone,
                         status: job.status,
-                        type: job.type,
+                        type: jobType,
                         cab: job.cab,
-                        notes: job.notes
+                        notes: job.notes || job.observations // Map observations to notes
                     }
                 };
             });
@@ -99,7 +115,9 @@ async function getEvents(req, res) {
         res.json(events);
     } catch (error) {
         console.error('Error fetching calendar events:', error);
-        res.status(500).json({ error: 'Failed to fetch calendar events' });
+        // Log stack trace for better debugging
+        console.error(error.stack);
+        res.status(500).json({ error: 'Failed to fetch calendar events', details: error.message });
     }
 }
 

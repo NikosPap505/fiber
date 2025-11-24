@@ -1,0 +1,263 @@
+/* ============================================
+   OPTIMIZED MOBILE CARDS CSS
+   Card-based mobile view with CSS variables
+   ============================================ */
+
+:root {
+  /* Colors */
+  --card-bg: #ffffff;
+  --card-border: #e5e7eb;
+  --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+
+  --border-light: #f3f4f6;
+
+  /* Badge colors */
+  --badge-completed-bg: #d1fae5;
+  --badge-completed-text: #065f46;
+
+  --badge-pending-bg: #fef3c7;
+  --badge-pending-text: #92400e;
+
+  --badge-progress-bg: #dbeafe;
+  --badge-progress-text: #1e40af;
+
+  --badge-cancelled-bg: #fee2e2;
+  --badge-cancelled-text: #991b1b;
+
+  --badge-digging-bg: #fed7aa;
+  --badge-digging-text: #9a3412;
+
+  /* Button colors */
+  --btn-primary-bg: #4f46e5;
+  --btn-primary-hover: #4338ca;
+  --btn-primary-text: #ffffff;
+
+  --btn-danger-bg: #ffffff;
+  --btn-danger-text: #dc2626;
+  --btn-danger-border: #dc2626;
+  --btn-danger-hover-bg: #fef2f2;
+
+  /* Spacing */
+  --card-padding: 1rem;
+  --card-gap: 1rem;
+  --field-gap: 0.5rem;
+}
+
+/* ============================================
+   RESPONSIVE VISIBILITY
+   ============================================ */
+
+/* Desktop: Show tables, hide cards */
+@media (min-width: 769px) {
+  .mobile-cards-container {
+    display: none !important;
+  }
+}
+
+/* Mobile: Hide tables, show cards */
+@media (max-width: 768px) {
+  .overflow-x-auto {
+    display: none !important;
+  }
+
+  .mobile-cards-container {
+    display: block !important;
+  }
+}
+
+/* ============================================
+   CARD BASE STYLES
+   ============================================ */
+
+.job-card,
+.site-card,
+.report-card,
+.user-card {
+  background: var(--card-bg);
+  border-radius: 0.75rem;
+  padding: var(--card-padding);
+  margin-bottom: var(--card-gap);
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--card-border);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.card-title {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text-primary);
+  flex: 1;
+}
+
+.card-body {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--field-gap);
+  margin-bottom: 0.75rem;
+}
+
+.card-field {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 0.25rem 0;
+}
+
+.card-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  flex-shrink: 0;
+  margin-right: 1rem;
+}
+
+.card-value {
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  text-align: right;
+  word-break: break-word;
+}
+
+/* ============================================
+   BADGES
+   ============================================ */
+
+.card-badge {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  margin-left: 0.5rem;
+  display: inline-block;
+}
+
+/* Status badges */
+.badge-completed {
+  background-color: var(--badge-completed-bg);
+  color: var(--badge-completed-text);
+}
+
+.badge-pending {
+  background-color: var(--badge-pending-bg);
+  color: var(--badge-pending-text);
+}
+
+.badge-in-progress {
+  background-color: var(--badge-progress-bg);
+  color: var(--badge-progress-text);
+}
+
+.badge-cancelled {
+  background-color: var(--badge-cancelled-bg);
+  color: var(--badge-cancelled-text);
+}
+
+/* Type badges - reuse status colors where appropriate */
+.badge-autopsy {
+  background-color: var(--badge-pending-bg);
+  color: var(--badge-pending-text);
+}
+
+.badge-digging {
+  background-color: var(--badge-digging-bg);
+  color: var(--badge-digging-text);
+}
+
+.badge-construction {
+  background-color: var(--badge-progress-bg);
+  color: var(--badge-progress-text);
+}
+
+.badge-optical {
+  background-color: var(--badge-completed-bg);
+  color: var(--badge-completed-text);
+}
+
+/* ============================================
+   ACTIONS
+   ============================================ */
+
+.card-actions {
+  display: flex;
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-light);
+}
+
+.card-actions button {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  border: 1px solid var(--card-border);
+  cursor: pointer;
+}
+
+.card-actions .btn-primary {
+  background-color: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+  border-color: var(--btn-primary-bg);
+}
+
+.card-actions .btn-primary:hover {
+  background-color: var(--btn-primary-hover);
+  border-color: var(--btn-primary-hover);
+}
+
+.card-actions .btn-secondary {
+  background-color: var(--card-bg);
+  color: var(--btn-primary-bg);
+  border-color: var(--btn-primary-bg);
+}
+
+.card-actions .btn-secondary:hover {
+  background-color: #eef2ff;
+}
+
+.card-actions .btn-danger {
+  background-color: var(--btn-danger-bg);
+  color: var(--btn-danger-text);
+  border-color: var(--btn-danger-border);
+}
+
+.card-actions .btn-danger:hover {
+  background-color: var(--btn-danger-hover-bg);
+}
+
+/* ============================================
+   EMPTY STATE
+   ============================================ */
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-muted);
+}
+
+.empty-state svg {
+  width: 4rem;
+  height: 4rem;
+  margin: 0 auto 1rem;
+  opacity: 0.3;
+}
+
+.empty-state p {
+  font-size: 1rem;
+  font-weight: 500;
+}
